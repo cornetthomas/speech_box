@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:speech_box/action_button_widget.dart';
 import 'package:speech_box/value_button_widget.dart';
 
 typedef VoidStringCallBack = void Function(String);
 
 final kKeyboardHeightFactor = 0.7;
-final kTextFieldHeightFactor = 0.15;
+final kTextFieldHeightFactor = 0.10;
 
 class ScanningKeyboard extends StatefulWidget {
   ScanningKeyboardState createState() => new ScanningKeyboardState();
@@ -42,7 +43,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                         style: Theme.of(context)
                             .textTheme
                             .title
-                            .copyWith(fontSize: 22.0),
+                            .copyWith(fontSize: 36.0),
                       ),
                     ),
                   ),
@@ -54,37 +55,26 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
             padding: const EdgeInsets.all(5.0),
             child: Row(
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: FlatButton(
-                    color: Colors.black12,
-                    onPressed: () {
-                      removeLastChar();
-                    },
-                    child: new Text("Backspace"),
-                  ),
+                ActionButton(
+                  displayValue: "Backspace",
+                  action: removeLastChar,
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: FlatButton(
-                    color: Colors.black12,
-                    onPressed: () {
-                      clearAllInput();
-                    },
-                    child: new Text("Clear all"),
-                  ),
+                ActionButton(
+                  displayValue: "Clear all",
+                  action: clearAllInput,
                 ),
               ],
             ),
           ),
           Row(
             children: <Widget>[
-              Column(children: [
+              Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 buildKeyboard(),
                 new ValueButton(
                   displayValue: "Space",
                   value: " ",
                   pressed: updateInputWith,
+                  width: MediaQuery.of(context).size.width * 0.6,
                 ),
               ]),
             ],
@@ -192,8 +182,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     int _lastSpaceIndex =
         _inputText.lastIndexOf(" ") == -1 ? 0 : _inputText.lastIndexOf(" ");
     setState(() {
-      String _searchValue = _inputText =
-          _inputText.substring(0, _lastSpaceIndex) + " " + value + " ";
+      _inputText = _inputText.substring(0, _lastSpaceIndex) + " " + value + " ";
     });
   }
 
