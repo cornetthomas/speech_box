@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:speech_box/action_button_widget.dart';
+import 'package:speech_box/suggestion_button_widget.dart';
 import 'package:speech_box/value_button_widget.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/services.dart';
@@ -122,7 +123,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
               ],
             ),
           ),
-          Container(height: 70.0, child: buildSuggestions()),
+          Container(height: 100.0, child: buildSuggestions()),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,16 +280,10 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
 
       Widget _button = Padding(
         padding: const EdgeInsets.all(4.0),
-        child: ActionChip(
-          padding: EdgeInsets.all(2.0),
-          label: Text(value),
-          labelStyle: Theme.of(context)
-              .textTheme
-              .caption
-              .copyWith(fontSize: 22.0, color: Colors.black),
-          onPressed: () {
-            updateInputReplace(value);
-          },
+        child: SuggestionButton(
+          displayValue: value,
+          value: value,
+          pressed: updateInputReplace,
         ),
       );
 
