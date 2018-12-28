@@ -4,6 +4,8 @@ import 'package:speech_box/suggestion_button_widget.dart';
 import 'package:speech_box/value_button_widget.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:core';
 
 typedef VoidStringCallBack = void Function(String);
 
@@ -170,7 +172,15 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                             : KeyBoardState.Numbers;
                       });
                     },
-                  )
+                  ),
+                  ActionButton(
+                    displayValue: "SMS",
+                    action: _sendText,
+                  ),
+                  ActionButton(
+                    displayValue: "MAIL",
+                    action: _sendMail,
+                  ),
                 ],
               )
             ],
@@ -352,6 +362,38 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
       var result = await flutterTts.speak(text);
       if (result == 1) {
         ttsState = TtsState.Stopped;
+      }
+    }
+  }
+
+  void _sendMail() async {
+    copyToClipboard();
+    // Android and iOS
+    String uri = 'mailto:?subject=Mail&body=${_inputText}';
+
+    String parsedUri = Uri.parse(uri).toString();
+
+    if (await canLaunch(parsedUri)) {
+      await launch(parsedUri);
+    } else {
+      throw 'Could not launch $parsedUri';
+    }
+  }
+
+  void _sendText() async {
+    copyToClipboard();
+
+    // Android
+    const uri = 'sms:';
+    if (await canLaunch(uri)) {
+      await launch(uri);
+    } else {
+      // iOS
+      const uri = 'sms:';
+      if (await canLaunch(uri)) {
+        await launch(uri);
+      } else {
+        throw 'Could not launch $uri';
       }
     }
   }
