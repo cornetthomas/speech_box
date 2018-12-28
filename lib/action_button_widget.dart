@@ -5,12 +5,14 @@ class ActionButton extends StatelessWidget {
   final VoidCallback action;
   final double width;
   final double height;
+  final Color color;
 
   ActionButton(
       {this.displayValue,
       @required this.action,
       this.height = 60.0,
-      this.width = 200.0});
+      this.width = 200.0,
+      this.color = Colors.green});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class ActionButton extends StatelessWidget {
       width: width,
       margin: EdgeInsets.all(4.0),
       child: RaisedButton(
-        color: Colors.green,
+        color: color,
         child: Text(
           displayValue,
           style: Theme.of(context).textTheme.title.copyWith(fontSize: 22.0),

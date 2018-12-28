@@ -176,10 +176,12 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                   ActionButton(
                     displayValue: "SMS",
                     action: _sendText,
+                    color: Colors.amber,
                   ),
                   ActionButton(
                     displayValue: "MAIL",
                     action: _sendMail,
+                    color: Colors.amber,
                   ),
                 ],
               )
