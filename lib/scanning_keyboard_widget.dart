@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:speech_box/action_button_widget.dart';
+import 'package:speech_box/suggestion_button_widget.dart';
 import 'package:speech_box/value_button_widget.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:core';
 
 typedef VoidStringCallBack = void Function(String);
 
@@ -122,14 +125,14 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
               ],
             ),
           ),
-          Container(height: 70.0, child: buildSuggestions()),
+          Container(height: 100.0, child: buildSuggestions()),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 buildKeyboard(),
-                new ValueButton(
+                ValueButton(
                   displayValue: "Space",
                   value: " ",
                   pressed: updateInputWith,
@@ -169,7 +172,17 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                             : KeyBoardState.Numbers;
                       });
                     },
-                  )
+                  ),
+                  ActionButton(
+                    displayValue: "SMS",
+                    action: _sendText,
+                    color: Colors.amber,
+                  ),
+                  ActionButton(
+                    displayValue: "MAIL",
+                    action: _sendMail,
+                    color: Colors.amber,
+                  ),
                 ],
               )
             ],
@@ -240,12 +253,10 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
           gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: axisCount),
           itemBuilder: (BuildContext context, int index) {
-            return Container(
-              child: ValueButton(
-                displayValue: keyboardValues[index],
-                value: keyboardValues[index],
-                pressed: updateInputWith,
-              ),
+            return ValueButton(
+              displayValue: keyboardValues[index],
+              value: keyboardValues[index],
+              pressed: updateInputWith,
             );
           }),
     );
@@ -279,16 +290,10 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
 
       Widget _button = Padding(
         padding: const EdgeInsets.all(4.0),
-        child: ActionChip(
-          padding: EdgeInsets.all(2.0),
-          label: Text(value),
-          labelStyle: Theme.of(context)
-              .textTheme
-              .caption
-              .copyWith(fontSize: 22.0, color: Colors.black),
-          onPressed: () {
-            updateInputReplace(value);
-          },
+        child: SuggestionButton(
+          displayValue: value,
+          value: value,
+          pressed: updateInputReplace,
         ),
       );
 
@@ -353,10 +358,44 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
   }
 
   Future speakText(String text) async {
+    print('Will speak');
     if (!(text == null) && !(ttsState == TtsState.Playing)) {
+      ttsState = TtsState.Playing;
       var result = await flutterTts.speak(text);
       if (result == 1) {
-        ttsState = TtsState.Playing;
+        ttsState = TtsState.Stopped;
+      }
+    }
+  }
+
+  void _sendMail() async {
+    copyToClipboard();
+    // Android and iOS
+    String uri = 'mailto:?subject=Mail&body=${_inputText}';
+
+    String parsedUri = Uri.parse(uri).toString();
+
+    if (await canLaunch(parsedUri)) {
+      await launch(parsedUri);
+    } else {
+      throw 'Could not launch $parsedUri';
+    }
+  }
+
+  void _sendText() async {
+    copyToClipboard();
+
+    // Android
+    const uri = 'sms:';
+    if (await canLaunch(uri)) {
+      await launch(uri);
+    } else {
+      // iOS
+      const uri = 'sms:';
+      if (await canLaunch(uri)) {
+        await launch(uri);
+      } else {
+        throw 'Could not launch $uri';
       }
     }
   }

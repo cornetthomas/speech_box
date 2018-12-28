@@ -7,7 +7,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'SpeechBox',
       theme: ThemeData(primaryColor: Colors.red),
       home: new MyHomePage(title: 'SpeechBox'),
