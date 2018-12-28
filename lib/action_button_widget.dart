@@ -29,7 +29,7 @@ class ActionButton extends StatelessWidget {
       child: FlatButton(
         child: Text(
           displayValue,
-          style: Theme.of(context).textTheme.title.copyWith(fontSize: 30.0),
+          style: Theme.of(context).textTheme.title.copyWith(fontSize: 22.0),
         ),
         onPressed: onButtonPressed,
       ),

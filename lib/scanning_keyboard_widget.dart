@@ -6,11 +6,12 @@ import 'package:flutter/services.dart';
 
 typedef VoidStringCallBack = void Function(String);
 
-final kKeyboardHeightFactor = 0.7;
+final kKeyboardHeightFactor = 0.55;
 final kTextFieldHeightFactor = 0.10;
 final kKeyboardWidthFactor = 0.8;
 
 enum TtsState { Playing, Stopped, Paused }
+enum KeyBoardState { Letters, Numbers }
 
 class ScanningKeyboard extends StatefulWidget {
   ScanningKeyboardState createState() => new ScanningKeyboardState();
@@ -21,6 +22,8 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
 
   FlutterTts flutterTts;
   TtsState ttsState;
+  List<String> keyboardValues;
+  KeyBoardState keyBoardState;
 
   @override
   void initState() {
@@ -28,6 +31,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
 
     flutterTts = FlutterTts();
     ttsState = TtsState.Stopped;
+
+    keyboardValues = letterValues;
+    keyBoardState = KeyBoardState.Letters;
 
     setupTts();
   }
@@ -118,6 +124,8 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
           ),
           Container(height: 70.0, child: buildSuggestions()),
           Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 buildKeyboard(),
@@ -129,6 +137,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                 ),
               ]),
               Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   ActionButton(
                     displayValue: "Backspace",
@@ -145,6 +154,21 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                   ActionButton(
                     displayValue: "Kopiëer",
                     action: copyToClipboard,
+                  ),
+                  ActionButton(
+                    displayValue: keyBoardState == KeyBoardState.Numbers
+                        ? "Letters"
+                        : "Cijfers",
+                    action: () {
+                      setState(() {
+                        keyboardValues = keyBoardState == KeyBoardState.Numbers
+                            ? letterValues
+                            : numberValues;
+                        keyBoardState = keyBoardState == KeyBoardState.Numbers
+                            ? KeyBoardState.Letters
+                            : KeyBoardState.Numbers;
+                      });
+                    },
                   )
                 ],
               )
@@ -155,7 +179,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     );
   }
 
-  List<String> keyboardValues = [
+  List<String> letterValues = [
     "a",
     "b",
     "c",
@@ -189,11 +213,24 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     "!"
   ];
 
+  List<String> numberValues = [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+  ];
+
   Widget buildKeyboard() {
-    int axisCount = (keyboardValues.length / 4).ceil().toInt();
+    int axisCount = (letterValues.length / 4).ceil().toInt();
 
     return Container(
       width: MediaQuery.of(context).size.width * kKeyboardWidthFactor,
+      height: MediaQuery.of(context).size.height * kKeyboardHeightFactor,
       child: GridView.builder(
           physics: NeverScrollableScrollPhysics(),
           primary: false,
@@ -215,16 +252,12 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
   }
 
   List<String> suggestions = [
-    "hallo",
-    "Hoe gaat het",
+    "Hallo",
+    "Hoe gaat het?",
     "Bedankt",
     "Ik",
-    "Dit is een test. Wat vind je er van?",
-    "hallo",
-    "Hoe gaat het",
-    "Bedankt",
-    "Ik",
-    "Dit is een test. Wat vind je er van?"
+    "Moemoe",
+    "Ik wil",
   ];
 
   Widget buildSuggestions() {
@@ -245,18 +278,14 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
       String value = suggestion;
 
       Widget _button = Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(4.0),
         child: ActionChip(
-          label: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              value,
-              style: Theme.of(context)
-                  .textTheme
-                  .caption
-                  .copyWith(fontSize: 28.0, color: Colors.black),
-            ),
-          ),
+          padding: EdgeInsets.all(2.0),
+          label: Text(value),
+          labelStyle: Theme.of(context)
+              .textTheme
+              .caption
+              .copyWith(fontSize: 22.0, color: Colors.black),
           onPressed: () {
             updateInputReplace(value);
           },
@@ -266,9 +295,12 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
       _suggestionButtons.add(_button);
     }
 
-    Widget list = ListView(
-      scrollDirection: Axis.horizontal,
-      children: _suggestionButtons,
+    Widget list = Padding(
+      padding: EdgeInsets.all(8.0),
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: _suggestionButtons,
+      ),
     );
 
     return list;
@@ -294,11 +326,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     String currentInput = _inputText.trim();
     int _lastSpaceIndex =
         currentInput.lastIndexOf(" ") == -1 ? 0 : currentInput.lastIndexOf(" ");
-    print(_lastSpaceIndex);
-    print(currentInput);
+
     setState(() {
       _inputText = currentInput.substring(0, _lastSpaceIndex);
-      print(_inputText);
     });
   }
 
@@ -325,9 +355,8 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
   Future speakText(String text) async {
     if (!(text == null) && !(ttsState == TtsState.Playing)) {
       var result = await flutterTts.speak(text);
-      print(result);
       if (result == 1) {
-        print("playyed");
+        ttsState = TtsState.Playing;
       }
     }
   }
