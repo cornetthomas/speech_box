@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:speech_box/action_button_widget.dart';
 import 'package:speech_box/value_button_widget.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter/services.dart';
 
 typedef VoidStringCallBack = void Function(String);
 
 final kKeyboardHeightFactor = 0.7;
 final kTextFieldHeightFactor = 0.10;
+
+enum TtsState { Playing, Stopped, Paused }
 
 class ScanningKeyboard extends StatefulWidget {
   ScanningKeyboardState createState() => new ScanningKeyboardState();
@@ -13,6 +17,59 @@ class ScanningKeyboard extends StatefulWidget {
 
 class ScanningKeyboardState extends State<ScanningKeyboard> {
   String _inputText = "";
+
+  FlutterTts flutterTts;
+  TtsState ttsState;
+
+  @override
+  void initState() {
+    super.initState();
+
+    flutterTts = FlutterTts();
+    ttsState = TtsState.Stopped;
+
+    setupTts();
+  }
+
+  Future setupTts() async {
+    String _language = "nl-NL";
+    double _speechRate = 0.3;
+    double _volume = 1.0;
+    double _pitch = 1.0;
+
+    try {
+      if (await flutterTts.isLanguageAvailable(_language)) {
+        await flutterTts.setSpeechRate(_speechRate);
+
+        await flutterTts.setVolume(_volume);
+
+        await flutterTts.setPitch(_pitch);
+
+        print(
+            "Language set: $_language, rate: $_speechRate, volume: $_volume, pitch: $_pitch");
+      }
+    } catch (e) {
+      print(e);
+    }
+
+    flutterTts.setStartHandler(() {
+      setState(() {
+        ttsState = TtsState.Playing;
+      });
+    });
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        ttsState = TtsState.Stopped;
+      });
+    });
+
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        ttsState = TtsState.Stopped;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,25 +82,30 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white70,
-                      border: Border.all(
-                        color: Colors.black54,
-                        width: 2.0,
+                  child: GestureDetector(
+                    onTap: () {
+                      speakText(_inputText);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white70,
+                        border: Border.all(
+                          color: Colors.black54,
+                          width: 2.0,
+                        ),
                       ),
-                    ),
-                    padding: const EdgeInsets.all(10.0),
-                    height: MediaQuery.of(context).size.height *
-                        kTextFieldHeightFactor,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: new Text(
-                        _inputText,
-                        style: Theme.of(context)
-                            .textTheme
-                            .title
-                            .copyWith(fontSize: 36.0),
+                      padding: const EdgeInsets.all(10.0),
+                      height: MediaQuery.of(context).size.height *
+                          kTextFieldHeightFactor,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: new Text(
+                          _inputText,
+                          style: Theme.of(context)
+                              .textTheme
+                              .title
+                              .copyWith(fontSize: 36.0),
+                        ),
                       ),
                     ),
                   ),
@@ -51,6 +113,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
               ],
             ),
           ),
+          // Action Buttons
           Padding(
             padding: const EdgeInsets.all(5.0),
             child: Row(
@@ -62,6 +125,10 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                 ActionButton(
                   displayValue: "Clear all",
                   action: clearAllInput,
+                ),
+                ActionButton(
+                  displayValue: "Copy",
+                  action: copyToClipboard,
                 ),
               ],
             ),
@@ -115,7 +182,12 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     "w",
     "x",
     "y",
-    "z"
+    "z",
+    ".",
+    ";",
+    "?",
+    ":",
+    "!"
   ];
 
   Widget buildKeyboard() {
@@ -142,7 +214,13 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     );
   }
 
-  List<String> suggestions = ["hallo", "Hoe gaat het", "Bedankt", "Ik"];
+  List<String> suggestions = [
+    "hallo",
+    "Hoe gaat het",
+    "Bedankt",
+    "Ik",
+    "Dit is een test. Wat vind je er van?"
+  ];
 
   Widget buildSuggestions() {
     List<Widget> _suggestionButtons = [];
@@ -186,6 +264,8 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     });
   }
 
+  // Actions
+
   void removeLastChar() {
     int maxIndex = _inputText.length - 1 > 0 ? _inputText.length - 1 : 0;
 
@@ -198,5 +278,19 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     setState(() {
       _inputText = "";
     });
+  }
+
+  void copyToClipboard() {
+    Clipboard.setData(new ClipboardData(text: _inputText));
+  }
+
+  Future speakText(String text) async {
+    if (!(text == null) && !(ttsState == TtsState.Playing)) {
+      var result = await flutterTts.speak(text);
+      print(result);
+      if (result == 1) {
+        print("playyed");
+      }
+    }
   }
 }
