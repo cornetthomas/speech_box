@@ -130,7 +130,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
             children: <Widget>[
               Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 buildKeyboard(),
-                new ValueButton(
+                ValueButton(
                   displayValue: "Space",
                   value: " ",
                   pressed: updateInputWith,
@@ -241,12 +241,10 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
           gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: axisCount),
           itemBuilder: (BuildContext context, int index) {
-            return Container(
-              child: ValueButton(
-                displayValue: keyboardValues[index],
-                value: keyboardValues[index],
-                pressed: updateInputWith,
-              ),
+            return ValueButton(
+              displayValue: keyboardValues[index],
+              value: keyboardValues[index],
+              pressed: updateInputWith,
             );
           }),
     );
@@ -348,10 +346,12 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
   }
 
   Future speakText(String text) async {
+    print('Will speak');
     if (!(text == null) && !(ttsState == TtsState.Playing)) {
+      ttsState = TtsState.Playing;
       var result = await flutterTts.speak(text);
       if (result == 1) {
-        ttsState = TtsState.Playing;
+        ttsState = TtsState.Stopped;
       }
     }
   }

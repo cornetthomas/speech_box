@@ -22,22 +22,17 @@ class ValueButton extends StatelessWidget {
       height: height,
       width: width,
       margin: EdgeInsets.all(4.0),
-      decoration: BoxDecoration(
+      child: RaisedButton(
         color: Colors.red,
-        shape: BoxShape.rectangle,
-        borderRadius: BorderRadius.all(Radius.circular(32.0)),
-        border: Border.all(
-          width: 2.0,
+        child: Text(
+          displayValue,
+          style: Theme.of(context).textTheme.title.copyWith(fontSize: 36.0),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: FlatButton(
-          child: Text(
-            displayValue,
-            style: Theme.of(context).textTheme.title.copyWith(fontSize: 36.0),
-          ),
-          onPressed: onButtonPressed,
+        onPressed: onButtonPressed,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+              color: Colors.black54, width: 2.0, style: BorderStyle.solid),
+          borderRadius: BorderRadius.circular(20.0),
         ),
       ),
     );
