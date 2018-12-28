@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:speech_box/scanning_keyboard_widget.dart';
+import 'package:speech_box/settings_drawer_widget.dart';
 
 void main() => runApp(new MyApp());
 
@@ -29,9 +30,16 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text(widget.title),
+        title: new Text(
+          widget.title,
+          style: Theme.of(context)
+              .accentTextTheme
+              .body2
+              .copyWith(color: Colors.red),
+        ),
       ),
       body: new Center(child: new ScanningKeyboard()),
+      drawer: SettingsDrawer(),
     );
   }
 }
