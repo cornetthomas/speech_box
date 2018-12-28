@@ -21,6 +21,15 @@ class ValueButton extends StatelessWidget {
     return Container(
       height: height,
       width: width,
+      margin: EdgeInsets.all(4.0),
+      decoration: BoxDecoration(
+        color: Colors.red,
+        shape: BoxShape.rectangle,
+        borderRadius: BorderRadius.all(Radius.circular(32.0)),
+        border: Border.all(
+          width: 2.0,
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(2.0),
         child: FlatButton(

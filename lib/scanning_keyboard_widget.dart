@@ -8,6 +8,7 @@ typedef VoidStringCallBack = void Function(String);
 
 final kKeyboardHeightFactor = 0.7;
 final kTextFieldHeightFactor = 0.10;
+final kKeyboardWidthFactor = 0.8;
 
 enum TtsState { Playing, Stopped, Paused }
 
@@ -78,33 +79,35 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Container(
-            margin: const EdgeInsets.all(5.0),
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      speakText(_inputText);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white70,
-                        border: Border.all(
-                          color: Colors.black54,
-                          width: 2.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        speakText(_inputText);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.all(Radius.circular(32.0)),
+                          border: Border.all(
+                            width: 2.0,
+                          ),
                         ),
-                      ),
-                      padding: const EdgeInsets.all(10.0),
-                      height: MediaQuery.of(context).size.height *
-                          kTextFieldHeightFactor,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: new Text(
-                          _inputText,
-                          style: Theme.of(context)
-                              .textTheme
-                              .title
-                              .copyWith(fontSize: 36.0),
+                        padding: const EdgeInsets.all(10.0),
+                        height: MediaQuery.of(context).size.height *
+                            kTextFieldHeightFactor,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            _inputText,
+                            style: Theme.of(context)
+                                .textTheme
+                                .title
+                                .copyWith(fontSize: 36.0),
+                          ),
                         ),
                       ),
                     ),
@@ -113,26 +116,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
               ],
             ),
           ),
-          // Action Buttons
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Row(
-              children: <Widget>[
-                ActionButton(
-                  displayValue: "Backspace",
-                  action: removeLastChar,
-                ),
-                ActionButton(
-                  displayValue: "Clear all",
-                  action: clearAllInput,
-                ),
-                ActionButton(
-                  displayValue: "Copy",
-                  action: copyToClipboard,
-                ),
-              ],
-            ),
-          ),
+          Container(height: 70.0, child: buildSuggestions()),
           Row(
             children: <Widget>[
               Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -144,11 +128,26 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                   width: MediaQuery.of(context).size.width * 0.6,
                 ),
               ]),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              buildSuggestions(),
+              Column(
+                children: <Widget>[
+                  ActionButton(
+                    displayValue: "Backspace",
+                    action: removeLastChar,
+                  ),
+                  ActionButton(
+                    displayValue: "Wis alles",
+                    action: clearAllInput,
+                  ),
+                  ActionButton(
+                    displayValue: "Wis woord",
+                    action: clearLastWord,
+                  ),
+                  ActionButton(
+                    displayValue: "Kopiëer",
+                    action: copyToClipboard,
+                  )
+                ],
+              )
             ],
           ),
         ],
@@ -191,17 +190,18 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
   ];
 
   Widget buildKeyboard() {
+    int axisCount = (keyboardValues.length / 4).ceil().toInt();
+
     return Container(
-      color: Colors.red,
-      width: MediaQuery.of(context).size.width * kKeyboardHeightFactor,
+      width: MediaQuery.of(context).size.width * kKeyboardWidthFactor,
       child: GridView.builder(
           physics: NeverScrollableScrollPhysics(),
           primary: false,
           shrinkWrap: true,
           padding: const EdgeInsets.all(5.0),
           itemCount: keyboardValues.length,
-          gridDelegate:
-              new SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
+          gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: axisCount),
           itemBuilder: (BuildContext context, int index) {
             return Container(
               child: ValueButton(
@@ -215,6 +215,11 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
   }
 
   List<String> suggestions = [
+    "hallo",
+    "Hoe gaat het",
+    "Bedankt",
+    "Ik",
+    "Dit is een test. Wat vind je er van?",
     "hallo",
     "Hoe gaat het",
     "Bedankt",
@@ -239,13 +244,34 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     for (String suggestion in filteredSuggestions) {
       String value = suggestion;
 
-      ValueButton _button = ValueButton(
-          value: value, displayValue: value, pressed: updateInputReplace);
+      Widget _button = Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ActionChip(
+          label: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              value,
+              style: Theme.of(context)
+                  .textTheme
+                  .caption
+                  .copyWith(fontSize: 28.0, color: Colors.black),
+            ),
+          ),
+          onPressed: () {
+            updateInputReplace(value);
+          },
+        ),
+      );
 
       _suggestionButtons.add(_button);
     }
 
-    return Row(children: _suggestionButtons);
+    Widget list = ListView(
+      scrollDirection: Axis.horizontal,
+      children: _suggestionButtons,
+    );
+
+    return list;
   }
 
   // Input field manipulation methods
@@ -261,6 +287,18 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
         _inputText.lastIndexOf(" ") == -1 ? 0 : _inputText.lastIndexOf(" ");
     setState(() {
       _inputText = _inputText.substring(0, _lastSpaceIndex) + " " + value + " ";
+    });
+  }
+
+  void clearLastWord() {
+    String currentInput = _inputText.trim();
+    int _lastSpaceIndex =
+        currentInput.lastIndexOf(" ") == -1 ? 0 : currentInput.lastIndexOf(" ");
+    print(_lastSpaceIndex);
+    print(currentInput);
+    setState(() {
+      _inputText = currentInput.substring(0, _lastSpaceIndex);
+      print(_inputText);
     });
   }
 
