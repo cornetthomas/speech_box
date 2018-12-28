@@ -3,12 +3,15 @@ import 'package:speech_box/value_button_widget.dart';
 
 typedef VoidStringCallBack = void Function(String);
 
+final kKeyboardHeightFactor = 0.7;
+final kTextFieldHeightFactor = 0.15;
+
 class ScanningKeyboard extends StatefulWidget {
   ScanningKeyboardState createState() => new ScanningKeyboardState();
 }
 
 class ScanningKeyboardState extends State<ScanningKeyboard> {
-  String _inputText = "_";
+  String _inputText = "";
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +33,16 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                       ),
                     ),
                     padding: const EdgeInsets.all(10.0),
-                    height: 60.0,
+                    height: MediaQuery.of(context).size.height *
+                        kTextFieldHeightFactor,
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: new Text(
                         _inputText,
-                        style: Theme.of(context).textTheme.title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .title
+                            .copyWith(fontSize: 22.0),
                       ),
                     ),
                   ),
@@ -75,6 +82,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
               Column(children: [
                 buildKeyboard(),
                 new ValueButton(
+                  displayValue: "Space",
                   value: " ",
                   pressed: updateInputWith,
                 ),
@@ -122,19 +130,23 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
 
   Widget buildKeyboard() {
     return Container(
-      height: 350.0,
-      width: 600.0,
+      color: Colors.red,
+      width: MediaQuery.of(context).size.width * kKeyboardHeightFactor,
       child: GridView.builder(
           physics: NeverScrollableScrollPhysics(),
           primary: false,
+          shrinkWrap: true,
           padding: const EdgeInsets.all(5.0),
           itemCount: keyboardValues.length,
           gridDelegate:
               new SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
           itemBuilder: (BuildContext context, int index) {
-            return ValueButton(
-              value: keyboardValues[index],
-              pressed: updateInputWith,
+            return Container(
+              child: ValueButton(
+                displayValue: keyboardValues[index],
+                value: keyboardValues[index],
+                pressed: updateInputWith,
+              ),
             );
           }),
     );
@@ -159,8 +171,8 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     for (String suggestion in filteredSuggestions) {
       String value = suggestion;
 
-      ValueButton _button =
-          ValueButton(value: value, pressed: updateInputReplace);
+      ValueButton _button = ValueButton(
+          value: value, displayValue: value, pressed: updateInputReplace);
 
       _suggestionButtons.add(_button);
     }
