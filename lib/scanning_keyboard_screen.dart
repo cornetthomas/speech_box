@@ -7,6 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:core';
+import 'package:shared_preferences/shared_preferences.dart';
 
 typedef VoidStringCallBack = void Function(String);
 
@@ -28,6 +29,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
   TtsState ttsState;
   List<String> keyboardValues;
   KeyBoardState keyBoardState;
+  List<String> _savedSentences = [];
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   @override
   void initState() {
@@ -40,6 +44,16 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     keyBoardState = KeyBoardState.Letters;
 
     setupTts();
+
+    _getSentences().then((sentences) {
+      setState(() {
+        if (sentences != null) {
+          _savedSentences = sentences;
+        }
+      });
+
+      print(_savedSentences);
+    });
   }
 
   Future setupTts() async {
@@ -125,6 +139,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                                       ? Icon(
                                           Icons.surround_sound,
                                           size: 60.0,
+                                          color: ttsState == TtsState.Playing
+                                              ? Colors.green
+                                              : Colors.black45,
                                         )
                                       : Container(),
                                   Text(
@@ -145,6 +162,29 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                 ),
               ),
               Container(height: 100.0, child: buildSuggestions()),
+              ActionButton(
+                displayValue: "Zin opslaan",
+                action: () {
+                  setState(() {
+                    _savedSentences.add(_inputText);
+                    _saveSentences();
+                  });
+
+                  //_saveSentenceForKey("sentence", _inputText);
+                },
+              ),
+              ActionButton(
+                displayValue: "PRINT",
+                action: () {
+                  print(_savedSentences);
+                },
+              ),
+              ActionButton(
+                displayValue: "DELETE",
+                action: () {
+                  _deleteSentences();
+                },
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -446,5 +486,34 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
         throw 'Could not launch $uri';
       }
     }
+  }
+
+  Future<Null> _saveSentences() async {
+    final SharedPreferences prefs = await _prefs;
+
+    setState(() {
+      prefs
+          .setStringList("savedSentences", _savedSentences)
+          .then((bool success) {});
+    });
+  }
+
+  Future<Null> _deleteSentences() async {
+    final SharedPreferences prefs = await _prefs;
+
+    setState(() {
+      prefs.remove("savedSentences").then((bool success) {
+        print("Saved sentences deleted");
+      }).catchError((e) {
+        print("Could not delete: $e");
+      });
+      _savedSentences = [];
+    });
+  }
+
+  Future<List<String>> _getSentences() async {
+    final SharedPreferences prefs = await _prefs;
+
+    return prefs.getStringList("savedSentences");
   }
 }
