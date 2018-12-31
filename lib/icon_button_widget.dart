@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:speech_box/scanning_keyboard_screen.dart';
 
-class ValueButton extends StatelessWidget {
+class IconBoardButton extends StatelessWidget {
   final String value;
-  final String displayValue;
+  final Icon icon;
   final VoidStringCallBack pressed;
   final double width;
   final double height;
 
-  ValueButton({
+  IconBoardButton({
     @required this.value,
-    this.displayValue,
+    this.icon,
     @required this.pressed,
     this.height = 60.0,
     this.width = 200.0,
@@ -23,14 +23,12 @@ class ValueButton extends StatelessWidget {
       width: width,
       margin: EdgeInsets.all(4.0),
       child: RaisedButton(
-        color: Colors.greenAccent,
-        child: Text(
-          displayValue,
-          style: Theme.of(context)
-              .textTheme
-              .title
-              .copyWith(fontSize: 40.0, fontWeight: FontWeight.bold),
-        ),
+        color: Colors.red,
+        child: Theme(
+            data: Theme.of(context).copyWith(
+              iconTheme: Theme.of(context).iconTheme.copyWith(size: 90.0),
+            ),
+            child: icon),
         onPressed: onButtonPressed,
         shape: RoundedRectangleBorder(
           side: BorderSide(

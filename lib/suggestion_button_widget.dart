@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:speech_box/scanning_keyboard_widget.dart';
+import 'package:speech_box/scanning_keyboard_screen.dart';
 
 class SuggestionButton extends StatelessWidget {
   final String value;
