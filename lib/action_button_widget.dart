@@ -23,8 +23,11 @@ class ActionButton extends StatelessWidget {
       child: RaisedButton(
         color: color,
         child: Text(
-          displayValue,
-          style: Theme.of(context).textTheme.title.copyWith(fontSize: 22.0),
+          displayValue.toUpperCase(),
+          style: Theme.of(context)
+              .textTheme
+              .title
+              .copyWith(fontSize: 26.0, fontWeight: FontWeight.bold),
         ),
         shape: RoundedRectangleBorder(
           side: BorderSide(
