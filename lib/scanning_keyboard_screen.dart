@@ -162,29 +162,6 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                 ),
               ),
               Container(height: 100.0, child: buildSuggestions()),
-              ActionButton(
-                displayValue: "Zin opslaan",
-                action: () {
-                  setState(() {
-                    _savedSentences.add(_inputText);
-                    _saveSentences();
-                  });
-
-                  //_saveSentenceForKey("sentence", _inputText);
-                },
-              ),
-              ActionButton(
-                displayValue: "PRINT",
-                action: () {
-                  print(_savedSentences);
-                },
-              ),
-              ActionButton(
-                displayValue: "DELETE",
-                action: () {
-                  _deleteSentences();
-                },
-              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,6 +246,29 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                         displayValue: "MAIL",
                         action: _sendMail,
                         color: Colors.amber,
+                      ),
+                      ActionButton(
+                        displayValue: "Zin opslaan",
+                        action: () {
+                          setState(() {
+                            _savedSentences.add(_inputText);
+                            _saveSentences();
+                          });
+
+                          //_saveSentenceForKey("sentence", _inputText);
+                        },
+                      ),
+                      ActionButton(
+                        displayValue: "PRINT",
+                        action: () {
+                          print(_savedSentences);
+                        },
+                      ),
+                      ActionButton(
+                        displayValue: "DELETE",
+                        action: () {
+                          _deleteSentences();
+                        },
                       ),
                     ],
                   )
