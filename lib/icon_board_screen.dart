@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:speech_box/action_button_widget.dart';
 import 'package:speech_box/icon_button_widget.dart';
 import 'package:speech_box/scanning_keyboard_screen.dart';
 
@@ -93,16 +94,25 @@ class IconBoardState extends State<IconBoard> {
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
             child: GridView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                primary: false,
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(5.0),
-                itemCount: _iconBoardButtons.length,
-                gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 5),
-                itemBuilder: (BuildContext context, int index) {
-                  return _iconBoardButtons[index];
-                }),
+              physics: NeverScrollableScrollPhysics(),
+              primary: false,
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(5.0),
+              itemCount: _iconBoardButtons.length + 1,
+              gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 5),
+              itemBuilder: (BuildContext context, int index) {
+                if (index == _iconBoardButtons.length) {
+                  return ActionButton(
+                    displayValue: "Terug",
+                    action: () {
+                      Navigator.pop(context);
+                    },
+                  );
+                }
+                return _iconBoardButtons[index];
+              },
+            ),
           ),
         ),
       ),
