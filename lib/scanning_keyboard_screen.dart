@@ -16,7 +16,7 @@ final kTextFieldHeightFactor = 0.10;
 final kKeyboardWidthFactor = 0.8;
 
 enum TtsState { Playing, Stopped, Paused }
-enum KeyBoardState { Letters, Numbers }
+enum KeyBoardState { Letters, Numbers, Sentences }
 
 class ScanningKeyboard extends StatefulWidget {
   ScanningKeyboardState createState() => new ScanningKeyboardState();
@@ -170,7 +170,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        buildKeyboard(),
+                        keyBoardState == KeyBoardState.Sentences
+                            ? buildSentencesList()
+                            : buildKeyboard(),
                         Container(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -202,7 +204,22 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                                 },
                               ),
                               ActionButton(
-                                displayValue: "ZINNEN",
+                                displayValue:
+                                    keyBoardState == KeyBoardState.Sentences
+                                        ? "Letters"
+                                        : "Zinnen",
+                                color: Colors.red,
+                                action: () {
+                                  setState(() {
+                                    keyBoardState =
+                                        keyBoardState == KeyBoardState.Sentences
+                                            ? KeyBoardState.Letters
+                                            : KeyBoardState.Sentences;
+                                  });
+                                },
+                              ),
+                              ActionButton(
+                                displayValue: "Iconen",
                                 action: () {
                                   Navigator.push(
                                     context,
@@ -347,6 +364,39 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
             );
           }),
     );
+  }
+
+  Widget buildSentencesList() {
+    return Container(
+        width: MediaQuery.of(context).size.width * 0.8,
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: ListView.builder(
+            itemCount: _savedSentences.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.lightGreen,
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.all(Radius.circular(32.0)),
+                    border: Border.all(
+                      width: 2.0,
+                    ),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      _savedSentences[index],
+                      style: Theme.of(context).textTheme.title.copyWith(
+                          fontSize: 40.0, fontWeight: FontWeight.bold),
+                    ),
+                    onTap: () {
+                      speakText(_savedSentences[index]);
+                    },
+                  ),
+                ),
+              );
+            }));
   }
 
   List<String> suggestions = [
