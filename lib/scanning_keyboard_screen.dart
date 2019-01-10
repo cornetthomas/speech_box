@@ -161,7 +161,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                   ],
                 ),
               ),
-              Container(height: 100.0, child: buildSuggestions()),
+              keyBoardState == KeyBoardState.Sentences
+                  ? Container()
+                  : Container(height: 100.0, child: buildSuggestions()),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,22 +241,52 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      ActionButton(
-                        displayValue: "Backspace",
-                        action: removeLastChar,
-                      ),
-                      ActionButton(
-                        displayValue: "Wis alles",
-                        action: clearAllInput,
-                      ),
-                      ActionButton(
-                        displayValue: "Wis woord",
-                        action: clearLastWord,
-                      ),
-                      ActionButton(
-                        displayValue: "Kopiëer",
-                        action: copyToClipboard,
-                      ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? Container()
+                          : ActionButton(
+                              displayValue: "Backspace",
+                              action: removeLastChar,
+                            ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? Container()
+                          : ActionButton(
+                              displayValue: "Wis alles",
+                              action: clearAllInput,
+                            ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? Container()
+                          : ActionButton(
+                              displayValue: "Wis woord",
+                              action: clearLastWord,
+                            ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? Container()
+                          : ActionButton(
+                              displayValue: "Kopiëer",
+                              action: copyToClipboard,
+                            ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? Container()
+                          : ActionButton(
+                              displayValue: "Zin opslaan",
+                              color: Colors.white70,
+                              action: () {
+                                setState(() {
+                                  _savedSentences.add(_inputText);
+                                  _saveSentences();
+                                });
+
+                                //_saveSentenceForKey("sentence", _inputText);
+                              },
+                            ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? ActionButton(
+                              displayValue: "VERWIJDER ZINNEN",
+                              action: () {
+                                _deleteSentences();
+                              },
+                            )
+                          : Container(),
                       ActionButton(
                         displayValue: "SMS",
                         action: _sendText,
@@ -264,24 +296,6 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                         displayValue: "MAIL",
                         action: _sendMail,
                         color: Colors.amber,
-                      ),
-                      ActionButton(
-                        displayValue: "Zin opslaan",
-                        color: Colors.white70,
-                        action: () {
-                          setState(() {
-                            _savedSentences.add(_inputText);
-                            _saveSentences();
-                          });
-
-                          //_saveSentenceForKey("sentence", _inputText);
-                        },
-                      ),
-                      ActionButton(
-                        displayValue: "VERWIJDER ZINNEN",
-                        action: () {
-                          _deleteSentences();
-                        },
                       ),
                     ],
                   )
@@ -494,10 +508,15 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     print("Should speak");
     if (!(text == null) && !(ttsState == TtsState.Playing)) {
       print("Ok, to speak");
-      ttsState = TtsState.Playing;
+      setState(() {
+        ttsState = TtsState.Playing;
+      });
+
       var result = await flutterTts.speak(text);
       if (result == 1) {
-        ttsState = TtsState.Stopped;
+        setState(() {
+          ttsState = TtsState.Stopped;
+        });
       }
     }
   }
