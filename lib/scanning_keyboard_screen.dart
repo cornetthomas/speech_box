@@ -215,6 +215,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                                         keyBoardState == KeyBoardState.Sentences
                                             ? KeyBoardState.Letters
                                             : KeyBoardState.Sentences;
+                                    keyboardValues = letterValues;
                                   });
                                 },
                               ),
@@ -266,6 +267,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                       ),
                       ActionButton(
                         displayValue: "Zin opslaan",
+                        color: Colors.white70,
                         action: () {
                           setState(() {
                             _savedSentences.add(_inputText);
@@ -276,13 +278,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                         },
                       ),
                       ActionButton(
-                        displayValue: "PRINT",
-                        action: () {
-                          print(_savedSentences);
-                        },
-                      ),
-                      ActionButton(
-                        displayValue: "DELETE",
+                        displayValue: "VERWIJDER ZINNEN",
                         action: () {
                           _deleteSentences();
                         },

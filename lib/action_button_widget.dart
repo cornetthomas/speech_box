@@ -24,6 +24,7 @@ class ActionButton extends StatelessWidget {
         color: color,
         child: Text(
           displayValue.toUpperCase(),
+          textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
               .title
