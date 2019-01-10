@@ -51,8 +51,6 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
           _savedSentences = sentences;
         }
       });
-
-      print(_savedSentences);
     });
   }
 
@@ -184,55 +182,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                                 displayValue: "SPATIE",
                                 value: " ",
                                 pressed: updateInputWith,
-                                width: 350.0,
-                              ),
-                              ActionButton(
-                                displayValue:
-                                    keyBoardState == KeyBoardState.Numbers
-                                        ? "Letters"
-                                        : "Cijfers",
-                                color: Colors.red,
-                                action: () {
-                                  setState(() {
-                                    keyboardValues =
-                                        keyBoardState == KeyBoardState.Numbers
-                                            ? letterValues
-                                            : numberValues;
-                                    keyBoardState =
-                                        keyBoardState == KeyBoardState.Numbers
-                                            ? KeyBoardState.Letters
-                                            : KeyBoardState.Numbers;
-                                  });
-                                },
-                              ),
-                              ActionButton(
-                                displayValue:
-                                    keyBoardState == KeyBoardState.Sentences
-                                        ? "Letters"
-                                        : "Zinnen",
-                                color: Colors.red,
-                                action: () {
-                                  setState(() {
-                                    keyBoardState =
-                                        keyBoardState == KeyBoardState.Sentences
-                                            ? KeyBoardState.Letters
-                                            : KeyBoardState.Sentences;
-                                    keyboardValues = letterValues;
-                                  });
-                                },
-                              ),
-                              ActionButton(
-                                displayValue: "Iconen",
-                                action: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                      return IconBoard();
-                                    }),
-                                  );
-                                },
-                                color: Colors.amber,
+                                width: 600.0,
                               ),
                             ],
                           ),
@@ -275,8 +225,6 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                                   _savedSentences.add(_inputText);
                                   _saveSentences();
                                 });
-
-                                //_saveSentenceForKey("sentence", _inputText);
                               },
                             ),
                       keyBoardState == KeyBoardState.Sentences
@@ -287,6 +235,51 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                               },
                             )
                           : Container(),
+                      ActionButton(
+                        displayValue: keyBoardState == KeyBoardState.Numbers
+                            ? "Letters"
+                            : "Cijfers",
+                        color: Colors.red,
+                        action: () {
+                          setState(() {
+                            keyboardValues =
+                                keyBoardState == KeyBoardState.Numbers
+                                    ? letterValues
+                                    : numberValues;
+                            keyBoardState =
+                                keyBoardState == KeyBoardState.Numbers
+                                    ? KeyBoardState.Letters
+                                    : KeyBoardState.Numbers;
+                          });
+                        },
+                      ),
+                      ActionButton(
+                        displayValue: keyBoardState == KeyBoardState.Sentences
+                            ? "Letters"
+                            : "Zinnen",
+                        color: Colors.red,
+                        action: () {
+                          setState(() {
+                            keyBoardState =
+                                keyBoardState == KeyBoardState.Sentences
+                                    ? KeyBoardState.Letters
+                                    : KeyBoardState.Sentences;
+                            keyboardValues = letterValues;
+                          });
+                        },
+                      ),
+                      ActionButton(
+                        displayValue: "Iconen",
+                        action: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (BuildContext context) {
+                              return IconBoard();
+                            }),
+                          );
+                        },
+                        color: Colors.red,
+                      ),
                       ActionButton(
                         displayValue: "SMS",
                         action: _sendText,
