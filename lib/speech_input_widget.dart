@@ -13,6 +13,8 @@ class SpeechInput extends StatefulWidget {
 }
 
 class _SpeechInputState extends State<SpeechInput> {
+  List<String> _savedSentences = [];
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -33,8 +35,7 @@ class _SpeechInputState extends State<SpeechInput> {
                     width: 2.0,
                   ),
                 ),
-                height:
-                    MediaQuery.of(context).size.height * kTextFieldHeightFactor,
+                height: MediaQuery.of(context).size.height * 0.10,
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Row(

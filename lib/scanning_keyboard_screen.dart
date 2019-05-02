@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:speech_box/action_button_widget.dart';
 import 'package:speech_box/icon_board_screen.dart';
+import 'package:speech_box/sentence_board_screen.dart';
 import 'package:speech_box/speech_input_widget.dart';
-import 'package:speech_box/suggestion_button_widget.dart';
 import 'package:speech_box/suggestions_widget.dart';
 import 'package:speech_box/value_button_widget.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -12,10 +12,6 @@ import 'dart:core';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef VoidStringCallBack = void Function(String);
-
-final kKeyboardHeightFactor = 0.55;
-final kTextFieldHeightFactor = 0.10;
-final kKeyboardWidthFactor = 0.8;
 
 enum TtsState { Playing, Stopped, Paused }
 enum KeyBoardState { Letters, Numbers, Sentences }
@@ -33,7 +29,6 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
   TtsState ttsState;
   List<String> keyboardValues;
   KeyBoardState keyBoardState;
-  List<String> _savedSentences = [];
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -51,14 +46,6 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     keyBoardState = KeyBoardState.Letters;
 
     setupTts();
-
-    _getSentences().then((sentences) {
-      setState(() {
-        if (sentences != null) {
-          _savedSentences = sentences;
-        }
-      });
-    });
   }
 
   Future setupTts() async {
@@ -113,7 +100,6 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
               ValueListenableBuilder<String>(
                 valueListenable: inputNotifier,
                 builder: (context, value, _) {
-                  print("rebuild");
                   return SpeechInput(value, speakText);
                 },
               ),
@@ -123,7 +109,6 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                 child: ValueListenableBuilder<String>(
                   valueListenable: inputNotifier,
                   builder: (context, value, _) {
-                    print("rebuild suggestions");
                     return Suggestions(value, updateInputReplace);
                   },
                 ),
@@ -332,10 +317,45 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                     color: Colors.white70,
                     action: () {
                       setState(() {
-                        _savedSentences.add(_inputText);
-                        _saveSentences();
+                        if (_inputText.isNotEmpty) {
+                          _saveSentence(_inputText);
+                        }
                       });
                     },
+                  ),
+                  ActionButton(
+                    displayValue: "Iconen",
+                    action: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (BuildContext context) {
+                          return IconBoard();
+                        }),
+                      );
+                    },
+                    color: Colors.red,
+                  ),
+                  ActionButton(
+                    displayValue: "Zinnen",
+                    action: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (BuildContext context) {
+                          return SentenceBoard();
+                        }),
+                      );
+                    },
+                    color: Colors.red,
+                  ),
+                  ActionButton(
+                    displayValue: "SMS",
+                    action: _sendText,
+                    color: Colors.amber,
+                  ),
+                  ActionButton(
+                    displayValue: "MAIL",
+                    action: _sendMail,
+                    color: Colors.amber,
                   ),
                 ],
               )
@@ -357,88 +377,6 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     "8",
     "9",
   ];
-
-  Widget buildSentencesList() {
-    return Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: ListView.builder(
-            itemCount: _savedSentences.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.lightGreen,
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.all(Radius.circular(32.0)),
-                    border: Border.all(
-                      width: 2.0,
-                    ),
-                  ),
-                  child: ListTile(
-                    title: Text(
-                      _savedSentences[index],
-                      style: Theme.of(context).textTheme.title.copyWith(
-                          fontSize: 40.0, fontWeight: FontWeight.bold),
-                    ),
-                    onTap: () {
-                      speakText(_savedSentences[index]);
-                    },
-                  ),
-                ),
-              );
-            }));
-  }
-
-  List<String> suggestions = [
-    "Hallo",
-    "Hoe gaat het?",
-    "Bedankt",
-    "Ik",
-    "Moemoe",
-    "Ik wil",
-  ];
-
-  Widget buildSuggestions() {
-    List<Widget> _suggestionButtons = [];
-
-    List<String> filteredSuggestions = List.from(suggestions);
-
-    int _lastSpaceIndex =
-        _inputText.lastIndexOf(" ") == -1 ? 0 : _inputText.lastIndexOf(" ");
-
-    String _searchValue =
-        _inputText.substring(_lastSpaceIndex, _inputText.length).trim();
-
-    filteredSuggestions.retainWhere(
-        (item) => item.toLowerCase().startsWith(_searchValue.toLowerCase()));
-
-    for (String suggestion in filteredSuggestions) {
-      String value = suggestion;
-
-      Widget _button = Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: SuggestionButton(
-          displayValue: value,
-          value: value,
-          pressed: updateInputReplace,
-        ),
-      );
-
-      _suggestionButtons.add(_button);
-    }
-
-    Widget list = Padding(
-      padding: EdgeInsets.all(8.0),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: _suggestionButtons,
-      ),
-    );
-
-    return list;
-  }
 
   // Input field manipulation methods
 
@@ -540,28 +478,17 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     }
   }
 
-  Future<Null> _saveSentences() async {
+  Future<Null> _saveSentence(String sentence) async {
     final SharedPreferences prefs = await _prefs;
 
     setState(() {
-      prefs
-          .setStringList("savedSentences", _savedSentences)
-          .then((bool success) {});
-    });
-  }
-
-  Future<Null> _deleteSentences() async {
-    final SharedPreferences prefs = await _prefs;
-
-    setState(() {
-      prefs.remove("savedSentences").then((bool success) {
-        setState(() {
-          keyBoardState = KeyBoardState.Letters;
-        });
-      }).catchError((e) {
-        print("Could not delete: $e");
+      _getSentences().then((result) {
+        if (result == null) {
+          result = List<String>();
+        }
+        result.add(sentence);
+        prefs.setStringList("savedSentences", result).then((bool success) {});
       });
-      _savedSentences = [];
     });
   }
 
