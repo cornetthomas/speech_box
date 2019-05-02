@@ -29,7 +29,7 @@ class ValueButton extends StatelessWidget {
           style: Theme.of(context)
               .textTheme
               .title
-              .copyWith(fontSize: 40.0, fontWeight: FontWeight.bold),
+              .copyWith(fontSize: 50.0, fontWeight: FontWeight.bold),
         ),
         onPressed: onButtonPressed,
         shape: RoundedRectangleBorder(

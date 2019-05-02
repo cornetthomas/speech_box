@@ -7,6 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:core';
+import 'package:shared_preferences/shared_preferences.dart';
 
 typedef VoidStringCallBack = void Function(String);
 
@@ -15,7 +16,7 @@ final kTextFieldHeightFactor = 0.10;
 final kKeyboardWidthFactor = 0.8;
 
 enum TtsState { Playing, Stopped, Paused }
-enum KeyBoardState { Letters, Numbers }
+enum KeyBoardState { Letters, Numbers, Sentences }
 
 class ScanningKeyboard extends StatefulWidget {
   ScanningKeyboardState createState() => new ScanningKeyboardState();
@@ -28,6 +29,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
   TtsState ttsState;
   List<String> keyboardValues;
   KeyBoardState keyBoardState;
+  List<String> _savedSentences = [];
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   @override
   void initState() {
@@ -40,6 +44,14 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     keyBoardState = KeyBoardState.Letters;
 
     setupTts();
+
+    _getSentences().then((sentences) {
+      setState(() {
+        if (sentences != null) {
+          _savedSentences = sentences;
+        }
+      });
+    });
   }
 
   Future setupTts() async {
@@ -125,6 +137,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                                       ? Icon(
                                           Icons.surround_sound,
                                           size: 60.0,
+                                          color: ttsState == TtsState.Playing
+                                              ? Colors.green
+                                              : Colors.black45,
                                         )
                                       : Container(),
                                   Text(
@@ -144,7 +159,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                   ],
                 ),
               ),
-              Container(height: 100.0, child: buildSuggestions()),
+              keyBoardState == KeyBoardState.Sentences
+                  ? Container()
+                  : Container(height: 100.0, child: buildSuggestions()),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,7 +170,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        buildKeyboard(),
+                        keyBoardState == KeyBoardState.Sentences
+                            ? buildSentencesList()
+                            : buildKeyboard(),
                         Container(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -163,39 +182,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                                 displayValue: "SPATIE",
                                 value: " ",
                                 pressed: updateInputWith,
-                                width: 350.0,
-                              ),
-                              ActionButton(
-                                displayValue:
-                                    keyBoardState == KeyBoardState.Numbers
-                                        ? "Letters"
-                                        : "Cijfers",
-                                color: Colors.red,
-                                action: () {
-                                  setState(() {
-                                    keyboardValues =
-                                        keyBoardState == KeyBoardState.Numbers
-                                            ? letterValues
-                                            : numberValues;
-                                    keyBoardState =
-                                        keyBoardState == KeyBoardState.Numbers
-                                            ? KeyBoardState.Letters
-                                            : KeyBoardState.Numbers;
-                                  });
-                                },
-                              ),
-                              ActionButton(
-                                displayValue: "ZINNEN",
-                                action: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                      return IconBoard();
-                                    }),
-                                  );
-                                },
-                                color: Colors.amber,
+                                width: 600.0,
                               ),
                             ],
                           ),
@@ -204,21 +191,94 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
+                      keyBoardState == KeyBoardState.Sentences
+                          ? Container()
+                          : ActionButton(
+                              displayValue: "Backspace",
+                              action: removeLastChar,
+                            ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? Container()
+                          : ActionButton(
+                              displayValue: "Wis alles",
+                              action: clearAllInput,
+                            ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? Container()
+                          : ActionButton(
+                              displayValue: "Wis woord",
+                              action: clearLastWord,
+                            ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? Container()
+                          : ActionButton(
+                              displayValue: "Kopiëer",
+                              action: copyToClipboard,
+                            ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? Container()
+                          : ActionButton(
+                              displayValue: "Zin opslaan",
+                              color: Colors.white70,
+                              action: () {
+                                setState(() {
+                                  _savedSentences.add(_inputText);
+                                  _saveSentences();
+                                });
+                              },
+                            ),
+                      keyBoardState == KeyBoardState.Sentences
+                          ? ActionButton(
+                              displayValue: "VERWIJDER ZINNEN",
+                              action: () {
+                                _deleteSentences();
+                              },
+                            )
+                          : Container(),
                       ActionButton(
-                        displayValue: "Backspace",
-                        action: removeLastChar,
+                        displayValue: keyBoardState == KeyBoardState.Numbers
+                            ? "Letters"
+                            : "Cijfers",
+                        color: Colors.red,
+                        action: () {
+                          setState(() {
+                            keyboardValues =
+                                keyBoardState == KeyBoardState.Numbers
+                                    ? letterValues
+                                    : numberValues;
+                            keyBoardState =
+                                keyBoardState == KeyBoardState.Numbers
+                                    ? KeyBoardState.Letters
+                                    : KeyBoardState.Numbers;
+                          });
+                        },
                       ),
                       ActionButton(
-                        displayValue: "Wis alles",
-                        action: clearAllInput,
+                        displayValue: keyBoardState == KeyBoardState.Sentences
+                            ? "Letters"
+                            : "Zinnen",
+                        color: Colors.red,
+                        action: () {
+                          setState(() {
+                            keyBoardState =
+                                keyBoardState == KeyBoardState.Sentences
+                                    ? KeyBoardState.Letters
+                                    : KeyBoardState.Sentences;
+                            keyboardValues = letterValues;
+                          });
+                        },
                       ),
                       ActionButton(
-                        displayValue: "Wis woord",
-                        action: clearLastWord,
-                      ),
-                      ActionButton(
-                        displayValue: "Kopiëer",
-                        action: copyToClipboard,
+                        displayValue: "Iconen",
+                        action: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (BuildContext context) {
+                              return IconBoard();
+                            }),
+                          );
+                        },
+                        color: Colors.red,
                       ),
                       ActionButton(
                         displayValue: "SMS",
@@ -307,6 +367,39 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
             );
           }),
     );
+  }
+
+  Widget buildSentencesList() {
+    return Container(
+        width: MediaQuery.of(context).size.width * 0.8,
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: ListView.builder(
+            itemCount: _savedSentences.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.lightGreen,
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.all(Radius.circular(32.0)),
+                    border: Border.all(
+                      width: 2.0,
+                    ),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      _savedSentences[index],
+                      style: Theme.of(context).textTheme.title.copyWith(
+                          fontSize: 40.0, fontWeight: FontWeight.bold),
+                    ),
+                    onTap: () {
+                      speakText(_savedSentences[index]);
+                    },
+                  ),
+                ),
+              );
+            }));
   }
 
   List<String> suggestions = [
@@ -408,10 +501,15 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     print("Should speak");
     if (!(text == null) && !(ttsState == TtsState.Playing)) {
       print("Ok, to speak");
-      ttsState = TtsState.Playing;
+      setState(() {
+        ttsState = TtsState.Playing;
+      });
+
       var result = await flutterTts.speak(text);
       if (result == 1) {
-        ttsState = TtsState.Stopped;
+        setState(() {
+          ttsState = TtsState.Stopped;
+        });
       }
     }
   }
@@ -446,5 +544,34 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
         throw 'Could not launch $uri';
       }
     }
+  }
+
+  Future<Null> _saveSentences() async {
+    final SharedPreferences prefs = await _prefs;
+
+    setState(() {
+      prefs
+          .setStringList("savedSentences", _savedSentences)
+          .then((bool success) {});
+    });
+  }
+
+  Future<Null> _deleteSentences() async {
+    final SharedPreferences prefs = await _prefs;
+
+    setState(() {
+      prefs.remove("savedSentences").then((bool success) {
+        print("Saved sentences deleted");
+      }).catchError((e) {
+        print("Could not delete: $e");
+      });
+      _savedSentences = [];
+    });
+  }
+
+  Future<List<String>> _getSentences() async {
+    final SharedPreferences prefs = await _prefs;
+
+    return prefs.getStringList("savedSentences");
   }
 }
