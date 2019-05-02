@@ -28,7 +28,7 @@ class ActionButton extends StatelessWidget {
           style: Theme.of(context)
               .textTheme
               .title
-              .copyWith(fontSize: 26.0, fontWeight: FontWeight.bold),
+              .copyWith(fontSize: 20.0, fontWeight: FontWeight.bold),
         ),
         shape: RoundedRectangleBorder(
           side: BorderSide(
