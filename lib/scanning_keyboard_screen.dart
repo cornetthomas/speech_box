@@ -561,7 +561,9 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
 
     setState(() {
       prefs.remove("savedSentences").then((bool success) {
-        print("Saved sentences deleted");
+        setState(() {
+          keyBoardState = KeyBoardState.Letters;
+        });
       }).catchError((e) {
         print("Could not delete: $e");
       });
