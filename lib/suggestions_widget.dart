@@ -13,13 +13,13 @@ class Suggestions extends StatefulWidget {
 }
 
 class _SuggestionsState extends State<Suggestions> {
-  List<String> suggestions = [
+  List<String> words = [
     "Werken ",
     "vragen",
     "leren",
     "sms'en",
     "vraag",
-    " waar",
+    "waar",
     "waarom",
     "wanneer",
     "wat",
@@ -27,7 +27,7 @@ class _SuggestionsState extends State<Suggestions> {
     "geld",
     "bank",
     "portefeuille",
-    " televisie",
+    "televisie",
     "radio",
     "beloofd",
     "centrum",
@@ -35,7 +35,7 @@ class _SuggestionsState extends State<Suggestions> {
     "school",
     "fiche",
     "kalender",
-    "cd- speler",
+    "cd-speler",
     "oppompen",
     "kinezaal",
     "mat",
@@ -53,7 +53,7 @@ class _SuggestionsState extends State<Suggestions> {
     "40",
     "50",
     "60",
-    " toekomst",
+    "toekomst",
     "valies",
     "deken",
     "voet",
@@ -61,19 +61,19 @@ class _SuggestionsState extends State<Suggestions> {
     "uurwerk",
     "keuken",
     "idee",
-    " 70",
+    "0",
     "80",
     "1001000",
-    " 2000",
+    "2000",
     "5000",
-    " handicap",
+    "handicap",
     "zomer",
     "herfst",
     "winter",
     "lente",
     "draad",
     "test",
-    " ik",
+    "ik",
     "moeder",
     "nonkel",
     "vrouw",
@@ -91,7 +91,7 @@ class _SuggestionsState extends State<Suggestions> {
     "10",
     "11",
     "12",
-    " opvoedster",
+    "opvoedster",
     "verpleging",
     "familie",
     "dokter",
@@ -200,13 +200,13 @@ class _SuggestionsState extends State<Suggestions> {
     "betalen",
     "oktober",
     "november",
-    " december",
+    "december",
     "tegenovergestelde",
     "koekje",
     "snoepje",
     "vis",
     "spaghetti",
-    " sla",
+    "sla",
     "appelsien",
     "banaan",
     "aardbei",
@@ -223,7 +223,7 @@ class _SuggestionsState extends State<Suggestions> {
     "knie",
     "pannekoek",
     "haar",
-    " hersenen",
+    "hersenen",
     "hand",
     "vinger",
     "voet",
@@ -304,16 +304,95 @@ class _SuggestionsState extends State<Suggestions> {
     "pull",
   ];
 
+  List<String> sentences = [
+    "Tanden poetsen aub",
+    "tot ziens",
+    "ik begrijp je niet",
+    "gelukkig verjaardag",
+    "hoe laat is het",
+    "hoe laat moet ik er zijn?",
+    "ik kan het niet zeggen",
+    "hoe gaat het?",
+    "ik ben verkeerd ",
+    "gelukkig nieuwjaar! ",
+    "zeg het nog eens aub! ",
+    "zet me eens recht aub?",
+    "wil je mijn tas nemen aub?",
+    "Het spijt me. ",
+    "ik ben Geert",
+    "ik woon in.",
+    "yo de mannen! ",
+    "ik wil iets zeggen.",
+    "ik vind dat mooi. ",
+    "ik vind dat vriendelijk",
+    "ik heb dorst!",
+    "ik ben ziek!",
+    "ik ben jaloers. ",
+    "ik ben kwaad",
+    "ik ben angstig",
+    "ik ben moe. ",
+    "ik ben klaar",
+    "het is zoet",
+    "het is zout",
+    "het is lekker",
+    "het is droog",
+    "kan je dat open doen",
+    "het is te luid",
+    "dat is slecht",
+    "het is nat",
+    "kan je dat dichtdoen? ",
+    "kraagje goed steken aub!",
+    "pullover goed aandoen",
+    "Wil je me helpen?",
+    "ik kan",
+    "ik maak",
+    "ik wil gaan winkelen",
+    "ik wil rijden",
+    "ik voel",
+    "blijf eraf",
+    "ik wil oefenen",
+    "wil je dit vastmaken?",
+    "ik bgrijp het",
+    "ik probeer",
+    "ik weet het",
+    "je doet me pijn",
+    "ik ben ongerust",
+    "ik amuseer me",
+    "ik geniet",
+    "ik ben blij",
+    "ik ben trots",
+    "ik heb honger",
+    "ik heb pijn",
+    "het is kapot",
+    "ik ben bang",
+    "ik wil naar de wc",
+    "mo vent toch! ",
+    "ik wil eten",
+    "ik heb",
+    "half uur",
+    "ik word",
+    "ik hoor",
+    "ik ruik",
+    "ik wil gaan wandelen",
+    "ik wil tv kijken",
+    "ik wil drinken",
+    "ik ben",
+    "ik kijk",
+  ];
+
+  List<String> suggestions = List<String>();
+
   @override
   void initState() {
     super.initState();
+
+    suggestions.addAll(words);
+    suggestions.addAll(sentences);
   }
 
   @override
   Widget build(BuildContext context) {
     List<String> filteredSuggestions = List.from(suggestions);
-
-    print(widget.filterValue);
 
     int _lastSpaceIndex = widget.filterValue.lastIndexOf(" ") == -1
         ? 0
@@ -322,8 +401,6 @@ class _SuggestionsState extends State<Suggestions> {
     String _searchValue = widget.filterValue
         .substring(_lastSpaceIndex, widget.filterValue.length)
         .trim();
-
-    print(_searchValue);
 
     filteredSuggestions.retainWhere(
         (item) => item.toLowerCase().startsWith(_searchValue.toLowerCase()));

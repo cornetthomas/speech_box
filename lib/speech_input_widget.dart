@@ -13,8 +13,6 @@ class SpeechInput extends StatefulWidget {
 }
 
 class _SpeechInputState extends State<SpeechInput> {
-  List<String> _savedSentences = [];
-
   @override
   Widget build(BuildContext context) {
     return Row(

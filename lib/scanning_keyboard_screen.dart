@@ -127,7 +127,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                     action: removeLastChar,
                   ),
                   ActionButton(
-                    displayValue: "Wis",
+                    displayValue: "Wis woord",
                     action: clearLastWord,
                   ),
                   ActionButton(
@@ -171,6 +171,17 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                     value: "j",
                     displayValue: "j",
                     pressed: updateInputWith,
+                  ),
+                  ActionButton(
+                    displayValue: "Zin opslaan",
+                    color: Colors.white70,
+                    action: () {
+                      setState(() {
+                        if (_inputText.isNotEmpty) {
+                          _saveSentence(_inputText);
+                        }
+                      });
+                    },
                   ),
                 ],
               ),
@@ -312,17 +323,6 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
               ),
               Row(
                 children: <Widget>[
-                  ActionButton(
-                    displayValue: "Zin opslaan",
-                    color: Colors.white70,
-                    action: () {
-                      setState(() {
-                        if (_inputText.isNotEmpty) {
-                          _saveSentence(_inputText);
-                        }
-                      });
-                    },
-                  ),
                   ActionButton(
                     displayValue: "Iconen",
                     action: () {
