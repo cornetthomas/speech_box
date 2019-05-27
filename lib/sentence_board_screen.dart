@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_box/action_button_widget.dart';
-import 'package:speech_box/icon_button_widget.dart';
 import 'package:speech_box/scanning_keyboard_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -76,6 +75,37 @@ class SentenceBoardState extends State<SentenceBoard> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> elements = List<Widget>();
+
+    for (String sentence in _savedSentences.reversed) {
+      Widget element = Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.lightGreen,
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.all(Radius.circular(32.0)),
+            border: Border.all(
+              width: 2.0,
+            ),
+          ),
+          child: ListTile(
+            title: Text(
+              sentence,
+              style: Theme.of(context)
+                  .textTheme
+                  .title
+                  .copyWith(fontSize: 40.0, fontWeight: FontWeight.bold),
+            ),
+            onTap: () {
+              speakText(sentence);
+            },
+          ),
+        ),
+      );
+      elements.add(element);
+    }
+
     return Scaffold(
       body: Center(
         child: SafeArea(
@@ -98,33 +128,12 @@ class SentenceBoardState extends State<SentenceBoard> {
             ),
             Container(
               height: MediaQuery.of(context).size.height * 0.8,
-              child: ListView.builder(
-                itemCount: _savedSentences.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.lightGreen,
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.all(Radius.circular(32.0)),
-                        border: Border.all(
-                          width: 2.0,
-                        ),
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          _savedSentences[index],
-                          style: Theme.of(context).textTheme.title.copyWith(
-                              fontSize: 40.0, fontWeight: FontWeight.bold),
-                        ),
-                        onTap: () {
-                          speakText(_savedSentences[index]);
-                        },
-                      ),
-                    ),
-                  );
-                },
+              width: MediaQuery.of(context).size.width,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  children: elements,
+                ),
               ),
             ),
           ]),

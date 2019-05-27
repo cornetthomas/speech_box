@@ -405,19 +405,24 @@ class _SuggestionsState extends State<Suggestions> {
     filteredSuggestions.retainWhere(
         (item) => item.toLowerCase().startsWith(_searchValue.toLowerCase()));
 
-    return ListView.builder(
-        itemCount: filteredSuggestions.length,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: SuggestionButton(
-              displayValue: filteredSuggestions[index],
-              value: filteredSuggestions[index],
-              pressed: widget.onSelect,
-              width: 200.0,
-            ),
-          );
-        });
+    List<Widget> elements = List<Widget>();
+
+    for (String suggestion in filteredSuggestions) {
+      Widget element = SuggestionButton(
+        displayValue: suggestion,
+        value: suggestion,
+        pressed: widget.onSelect,
+        width: 200.0,
+      );
+      elements.add(element);
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: NeverScrollableScrollPhysics(),
+      child: Row(
+        children: elements,
+      ),
+    );
   }
 }

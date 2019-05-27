@@ -96,270 +96,274 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(children: [
-              ValueListenableBuilder<String>(
-                valueListenable: inputNotifier,
-                builder: (context, value, _) {
-                  return SpeechInput(value, speakText);
-                },
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height * 0.10,
-                child: ValueListenableBuilder<String>(
-                  valueListenable: inputNotifier,
-                  builder: (context, value, _) {
-                    return Suggestions(value, updateInputReplace);
-                  },
-                ),
-              ),
-              Row(
-                children: <Widget>[
-                  ValueButton(
-                    value: " ",
-                    displayValue: "SPATIE",
-                    pressed: updateInputWith,
-                    height: 80.0,
-                    width: 200.0,
-                  ),
-                  ActionButton(
-                    displayValue: "WIS",
-                    action: removeLastChar,
-                  ),
-                  ActionButton(
-                    displayValue: "Wis woord",
-                    action: clearLastWord,
-                  ),
-                  ActionButton(
-                    displayValue: "Wis alles",
-                    action: clearAllInput,
-                  ),
-                  ActionButton(
-                    displayValue: "Kopiëer",
-                    action: copyToClipboard,
-                  ),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  ValueButton(
-                    value: "e",
-                    displayValue: "e",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "n",
-                    displayValue: "n",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "t",
-                    displayValue: "t",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "d",
-                    displayValue: "d",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "g",
-                    displayValue: "g",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "j",
-                    displayValue: "j",
-                    pressed: updateInputWith,
-                  ),
-                  ActionButton(
-                    displayValue: "Zin opslaan",
-                    color: Colors.white70,
-                    action: () {
-                      setState(() {
-                        if (_inputText.isNotEmpty) {
-                          _saveSentence(_inputText);
-                        }
-                      });
+            child: Semantics(
+              child: Column(
+                children: [
+                  ValueListenableBuilder<String>(
+                    valueListenable: inputNotifier,
+                    builder: (context, value, _) {
+                      return SpeechInput(value, speakText);
                     },
                   ),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 0.10,
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: inputNotifier,
+                      builder: (context, value, _) {
+                        return Suggestions(value, updateInputReplace);
+                      },
+                    ),
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: " ",
+                        displayValue: "SPATIE",
+                        pressed: updateInputWith,
+                        height: 80.0,
+                        width: 200.0,
+                      ),
+                      ActionButton(
+                        displayValue: "WIS",
+                        action: removeLastChar,
+                      ),
+                      ActionButton(
+                        displayValue: "Wis woord",
+                        action: clearLastWord,
+                      ),
+                      ActionButton(
+                        displayValue: "Wis alles",
+                        action: clearAllInput,
+                      ),
+                      ActionButton(
+                        displayValue: "Kopiëer",
+                        action: copyToClipboard,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: "e",
+                        displayValue: "e",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "n",
+                        displayValue: "n",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "t",
+                        displayValue: "t",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "d",
+                        displayValue: "d",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "g",
+                        displayValue: "g",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "j",
+                        displayValue: "j",
+                        pressed: updateInputWith,
+                      ),
+                      ActionButton(
+                        displayValue: "Zin opslaan",
+                        color: Colors.white70,
+                        action: () {
+                          setState(() {
+                            if (_inputText.isNotEmpty) {
+                              _saveSentence(_inputText);
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: "a",
+                        displayValue: "a",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "i",
+                        displayValue: "i",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "r",
+                        displayValue: "r",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "h",
+                        displayValue: "h",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "v",
+                        displayValue: "v",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "c",
+                        displayValue: "c",
+                        pressed: updateInputWith,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: "o",
+                        displayValue: "o",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "l",
+                        displayValue: "l",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "k",
+                        displayValue: "k",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "w",
+                        displayValue: "w",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "f",
+                        displayValue: "f",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: ",",
+                        displayValue: ",",
+                        pressed: updateInputWith,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: "s",
+                        displayValue: "s",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "u",
+                        displayValue: "u",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "z",
+                        displayValue: "z",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "x",
+                        displayValue: "x",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: ".",
+                        displayValue: ".",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "m",
+                        displayValue: "m",
+                        pressed: updateInputWith,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: "b",
+                        displayValue: "b",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "y",
+                        displayValue: "y",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "?",
+                        displayValue: "?",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "!",
+                        displayValue: "!",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "p",
+                        displayValue: "p",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "q",
+                        displayValue: "q",
+                        pressed: updateInputWith,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ActionButton(
+                        displayValue: "Iconen",
+                        action: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (BuildContext context) {
+                              return IconBoard();
+                            }),
+                          );
+                        },
+                        color: Colors.red,
+                      ),
+                      ActionButton(
+                        displayValue: "Zinnen",
+                        action: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (BuildContext context) {
+                              return SentenceBoard();
+                            }),
+                          );
+                        },
+                        color: Colors.red,
+                      ),
+                      ActionButton(
+                        displayValue: "SMS",
+                        action: _sendText,
+                        color: Colors.amber,
+                      ),
+                      ActionButton(
+                        displayValue: "MAIL",
+                        action: _sendMail,
+                        color: Colors.amber,
+                      ),
+                    ],
+                  ),
                 ],
               ),
-              Row(
-                children: <Widget>[
-                  ValueButton(
-                    value: "a",
-                    displayValue: "a",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "i",
-                    displayValue: "i",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "r",
-                    displayValue: "r",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "h",
-                    displayValue: "h",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "v",
-                    displayValue: "v",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "c",
-                    displayValue: "c",
-                    pressed: updateInputWith,
-                  ),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  ValueButton(
-                    value: "o",
-                    displayValue: "o",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "l",
-                    displayValue: "l",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "k",
-                    displayValue: "k",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "w",
-                    displayValue: "w",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "f",
-                    displayValue: "f",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: ",",
-                    displayValue: ",",
-                    pressed: updateInputWith,
-                  ),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  ValueButton(
-                    value: "s",
-                    displayValue: "s",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "u",
-                    displayValue: "u",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "z",
-                    displayValue: "z",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "x",
-                    displayValue: "x",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: ".",
-                    displayValue: ".",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "m",
-                    displayValue: "m",
-                    pressed: updateInputWith,
-                  ),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  ValueButton(
-                    value: "b",
-                    displayValue: "b",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "y",
-                    displayValue: "y",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "?",
-                    displayValue: "?",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "!",
-                    displayValue: "!",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "p",
-                    displayValue: "p",
-                    pressed: updateInputWith,
-                  ),
-                  ValueButton(
-                    value: "q",
-                    displayValue: "q",
-                    pressed: updateInputWith,
-                  ),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  ActionButton(
-                    displayValue: "Iconen",
-                    action: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (BuildContext context) {
-                          return IconBoard();
-                        }),
-                      );
-                    },
-                    color: Colors.red,
-                  ),
-                  ActionButton(
-                    displayValue: "Zinnen",
-                    action: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (BuildContext context) {
-                          return SentenceBoard();
-                        }),
-                      );
-                    },
-                    color: Colors.red,
-                  ),
-                  ActionButton(
-                    displayValue: "SMS",
-                    action: _sendText,
-                    color: Colors.amber,
-                  ),
-                  ActionButton(
-                    displayValue: "MAIL",
-                    action: _sendMail,
-                    color: Colors.amber,
-                  ),
-                ],
-              )
-            ]),
+            ),
           ),
         ),
       ),
