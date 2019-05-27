@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:speech_box/action_button_widget.dart';
 import 'package:speech_box/icon_board_screen.dart';
-import 'package:speech_box/suggestion_button_widget.dart';
+import 'package:speech_box/sentence_board_screen.dart';
+import 'package:speech_box/speech_input_widget.dart';
+import 'package:speech_box/suggestions_widget.dart';
 import 'package:speech_box/value_button_widget.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/services.dart';
@@ -10,10 +12,6 @@ import 'dart:core';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef VoidStringCallBack = void Function(String);
-
-final kKeyboardHeightFactor = 0.55;
-final kTextFieldHeightFactor = 0.10;
-final kKeyboardWidthFactor = 0.8;
 
 enum TtsState { Playing, Stopped, Paused }
 enum KeyBoardState { Letters, Numbers, Sentences }
@@ -25,33 +23,29 @@ class ScanningKeyboard extends StatefulWidget {
 class ScanningKeyboardState extends State<ScanningKeyboard> {
   String _inputText = "";
 
+  var inputNotifier;
+
   FlutterTts flutterTts;
   TtsState ttsState;
   List<String> keyboardValues;
   KeyBoardState keyBoardState;
-  List<String> _savedSentences = [];
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  List<Widget> gridElements = List<Widget>();
 
   @override
   void initState() {
     super.initState();
 
+    inputNotifier = ValueNotifier<String>(_inputText);
+
     flutterTts = FlutterTts();
     ttsState = TtsState.Stopped;
 
-    keyboardValues = letterValues;
     keyBoardState = KeyBoardState.Letters;
 
     setupTts();
-
-    _getSentences().then((sentences) {
-      setState(() {
-        if (sentences != null) {
-          _savedSentences = sentences;
-        }
-      });
-    });
   }
 
   Future setupTts() async {
@@ -98,176 +92,239 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white70,
-      appBar: AppBar(
-        title: Text("SpraakBak"),
-      ),
       body: Center(
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            speakText(_inputText);
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white30,
-                              shape: BoxShape.rectangle,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(32.0)),
-                              border: Border.all(
-                                width: 2.0,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(10.0),
-                            height: MediaQuery.of(context).size.height *
-                                kTextFieldHeightFactor,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                children: [
-                                  _inputText.isNotEmpty
-                                      ? Icon(
-                                          Icons.surround_sound,
-                                          size: 60.0,
-                                          color: ttsState == TtsState.Playing
-                                              ? Colors.green
-                                              : Colors.black45,
-                                        )
-                                      : Container(),
-                                  Text(
-                                    _inputText,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .title
-                                        .copyWith(fontSize: 36.0),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Semantics(
+              child: Column(
+                children: [
+                  ValueListenableBuilder<String>(
+                    valueListenable: inputNotifier,
+                    builder: (context, value, _) {
+                      return SpeechInput(value, speakText);
+                    },
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 0.10,
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: inputNotifier,
+                      builder: (context, value, _) {
+                        return Suggestions(value, updateInputReplace);
+                      },
                     ),
-                  ],
-                ),
-              ),
-              keyBoardState == KeyBoardState.Sentences
-                  ? Container()
-                  : Container(height: 100.0, child: buildSuggestions()),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        keyBoardState == KeyBoardState.Sentences
-                            ? buildSentencesList()
-                            : buildKeyboard(),
-                        Container(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ValueButton(
-                                displayValue: "SPATIE",
-                                value: " ",
-                                pressed: updateInputWith,
-                                width: 600.0,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ]),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                  ),
+                  Row(
                     children: <Widget>[
-                      keyBoardState == KeyBoardState.Sentences
-                          ? Container()
-                          : ActionButton(
-                              displayValue: "Backspace",
-                              action: removeLastChar,
-                            ),
-                      keyBoardState == KeyBoardState.Sentences
-                          ? Container()
-                          : ActionButton(
-                              displayValue: "Wis alles",
-                              action: clearAllInput,
-                            ),
-                      keyBoardState == KeyBoardState.Sentences
-                          ? Container()
-                          : ActionButton(
-                              displayValue: "Wis woord",
-                              action: clearLastWord,
-                            ),
-                      keyBoardState == KeyBoardState.Sentences
-                          ? Container()
-                          : ActionButton(
-                              displayValue: "Kopiëer",
-                              action: copyToClipboard,
-                            ),
-                      keyBoardState == KeyBoardState.Sentences
-                          ? Container()
-                          : ActionButton(
-                              displayValue: "Zin opslaan",
-                              color: Colors.white70,
-                              action: () {
-                                setState(() {
-                                  _savedSentences.add(_inputText);
-                                  _saveSentences();
-                                });
-                              },
-                            ),
-                      keyBoardState == KeyBoardState.Sentences
-                          ? ActionButton(
-                              displayValue: "VERWIJDER ZINNEN",
-                              action: () {
-                                _deleteSentences();
-                              },
-                            )
-                          : Container(),
+                      ValueButton(
+                        value: " ",
+                        displayValue: "SPATIE",
+                        pressed: updateInputWith,
+                        height: 80.0,
+                        width: 200.0,
+                      ),
                       ActionButton(
-                        displayValue: keyBoardState == KeyBoardState.Numbers
-                            ? "Letters"
-                            : "Cijfers",
-                        color: Colors.red,
+                        displayValue: "WIS",
+                        action: removeLastChar,
+                      ),
+                      ActionButton(
+                        displayValue: "Wis woord",
+                        action: clearLastWord,
+                      ),
+                      ActionButton(
+                        displayValue: "Wis alles",
+                        action: clearAllInput,
+                      ),
+                      ActionButton(
+                        displayValue: "Kopiëer",
+                        action: copyToClipboard,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: "e",
+                        displayValue: "e",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "n",
+                        displayValue: "n",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "t",
+                        displayValue: "t",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "d",
+                        displayValue: "d",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "g",
+                        displayValue: "g",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "j",
+                        displayValue: "j",
+                        pressed: updateInputWith,
+                      ),
+                      ActionButton(
+                        displayValue: "Zin opslaan",
+                        color: Colors.white70,
                         action: () {
                           setState(() {
-                            keyboardValues =
-                                keyBoardState == KeyBoardState.Numbers
-                                    ? letterValues
-                                    : numberValues;
-                            keyBoardState =
-                                keyBoardState == KeyBoardState.Numbers
-                                    ? KeyBoardState.Letters
-                                    : KeyBoardState.Numbers;
+                            if (_inputText.isNotEmpty) {
+                              _saveSentence(_inputText);
+                            }
                           });
                         },
                       ),
-                      ActionButton(
-                        displayValue: keyBoardState == KeyBoardState.Sentences
-                            ? "Letters"
-                            : "Zinnen",
-                        color: Colors.red,
-                        action: () {
-                          setState(() {
-                            keyBoardState =
-                                keyBoardState == KeyBoardState.Sentences
-                                    ? KeyBoardState.Letters
-                                    : KeyBoardState.Sentences;
-                            keyboardValues = letterValues;
-                          });
-                        },
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: "a",
+                        displayValue: "a",
+                        pressed: updateInputWith,
                       ),
+                      ValueButton(
+                        value: "i",
+                        displayValue: "i",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "r",
+                        displayValue: "r",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "h",
+                        displayValue: "h",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "v",
+                        displayValue: "v",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "c",
+                        displayValue: "c",
+                        pressed: updateInputWith,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: "o",
+                        displayValue: "o",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "l",
+                        displayValue: "l",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "k",
+                        displayValue: "k",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "w",
+                        displayValue: "w",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "f",
+                        displayValue: "f",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: ",",
+                        displayValue: ",",
+                        pressed: updateInputWith,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: "s",
+                        displayValue: "s",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "u",
+                        displayValue: "u",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "z",
+                        displayValue: "z",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "x",
+                        displayValue: "x",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: ".",
+                        displayValue: ".",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "m",
+                        displayValue: "m",
+                        pressed: updateInputWith,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      ValueButton(
+                        value: "b",
+                        displayValue: "b",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "y",
+                        displayValue: "y",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "?",
+                        displayValue: "?",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "!",
+                        displayValue: "!",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "p",
+                        displayValue: "p",
+                        pressed: updateInputWith,
+                      ),
+                      ValueButton(
+                        value: "q",
+                        displayValue: "q",
+                        pressed: updateInputWith,
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
                       ActionButton(
                         displayValue: "Iconen",
                         action: () {
@@ -275,6 +332,18 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                             context,
                             MaterialPageRoute(builder: (BuildContext context) {
                               return IconBoard();
+                            }),
+                          );
+                        },
+                        color: Colors.red,
+                      ),
+                      ActionButton(
+                        displayValue: "Zinnen",
+                        action: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (BuildContext context) {
+                              return SentenceBoard();
                             }),
                           );
                         },
@@ -291,48 +360,15 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
                         color: Colors.amber,
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
-
-  List<String> letterValues = [
-    "e",
-    "n",
-    "t",
-    "d",
-    "g",
-    "j",
-    "a",
-    "i",
-    "r",
-    "h",
-    "v",
-    "c",
-    "o",
-    "l",
-    "k",
-    "w",
-    "f",
-    ",",
-    "s",
-    "u",
-    "z",
-    "x",
-    ".",
-    "m",
-    "b",
-    "y",
-    "?",
-    "!",
-    "p",
-    "q",
-  ];
 
   List<String> numberValues = [
     "1",
@@ -346,116 +382,12 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     "9",
   ];
 
-  Widget buildKeyboard() {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.8,
-      height: MediaQuery.of(context).size.height * 0.6,
-      child: GridView.builder(
-          physics: NeverScrollableScrollPhysics(),
-          primary: false,
-          shrinkWrap: true,
-          scrollDirection: Axis.vertical,
-          padding: const EdgeInsets.all(5.0),
-          itemCount: keyboardValues.length,
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 150.0),
-          itemBuilder: (BuildContext context, int index) {
-            return ValueButton(
-              displayValue: keyboardValues[index],
-              value: keyboardValues[index],
-              pressed: updateInputWith,
-            );
-          }),
-    );
-  }
-
-  Widget buildSentencesList() {
-    return Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: ListView.builder(
-            itemCount: _savedSentences.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.lightGreen,
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.all(Radius.circular(32.0)),
-                    border: Border.all(
-                      width: 2.0,
-                    ),
-                  ),
-                  child: ListTile(
-                    title: Text(
-                      _savedSentences[index],
-                      style: Theme.of(context).textTheme.title.copyWith(
-                          fontSize: 40.0, fontWeight: FontWeight.bold),
-                    ),
-                    onTap: () {
-                      speakText(_savedSentences[index]);
-                    },
-                  ),
-                ),
-              );
-            }));
-  }
-
-  List<String> suggestions = [
-    "Hallo",
-    "Hoe gaat het?",
-    "Bedankt",
-    "Ik",
-    "Moemoe",
-    "Ik wil",
-  ];
-
-  Widget buildSuggestions() {
-    List<Widget> _suggestionButtons = [];
-
-    List<String> filteredSuggestions = List.from(suggestions);
-
-    int _lastSpaceIndex =
-        _inputText.lastIndexOf(" ") == -1 ? 0 : _inputText.lastIndexOf(" ");
-
-    String _searchValue =
-        _inputText.substring(_lastSpaceIndex, _inputText.length).trim();
-
-    filteredSuggestions.retainWhere(
-        (item) => item.toLowerCase().startsWith(_searchValue.toLowerCase()));
-
-    for (String suggestion in filteredSuggestions) {
-      String value = suggestion;
-
-      Widget _button = Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: SuggestionButton(
-          displayValue: value,
-          value: value,
-          pressed: updateInputReplace,
-        ),
-      );
-
-      _suggestionButtons.add(_button);
-    }
-
-    Widget list = Padding(
-      padding: EdgeInsets.all(8.0),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: _suggestionButtons,
-      ),
-    );
-
-    return list;
-  }
-
   // Input field manipulation methods
 
   void updateInputWith(String value) {
     setState(() {
       _inputText += value;
+      inputNotifier.value = _inputText;
     });
   }
 
@@ -464,6 +396,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
         _inputText.lastIndexOf(" ") == -1 ? 0 : _inputText.lastIndexOf(" ");
     setState(() {
       _inputText = _inputText.substring(0, _lastSpaceIndex) + " " + value + " ";
+      inputNotifier.value = _inputText;
     });
   }
 
@@ -474,6 +407,7 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
 
     setState(() {
       _inputText = currentInput.substring(0, _lastSpaceIndex);
+      inputNotifier.value = _inputText;
     });
   }
 
@@ -484,17 +418,19 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
 
     setState(() {
       _inputText = _inputText.substring(0, maxIndex);
+      inputNotifier.value = _inputText;
     });
   }
 
   void clearAllInput() {
     setState(() {
       _inputText = "";
+      inputNotifier.value = _inputText;
     });
   }
 
   void copyToClipboard() {
-    Clipboard.setData(new ClipboardData(text: _inputText));
+    Clipboard.setData(ClipboardData(text: _inputText));
   }
 
   Future speakText(String text) async {
@@ -546,28 +482,17 @@ class ScanningKeyboardState extends State<ScanningKeyboard> {
     }
   }
 
-  Future<Null> _saveSentences() async {
+  Future<Null> _saveSentence(String sentence) async {
     final SharedPreferences prefs = await _prefs;
 
     setState(() {
-      prefs
-          .setStringList("savedSentences", _savedSentences)
-          .then((bool success) {});
-    });
-  }
-
-  Future<Null> _deleteSentences() async {
-    final SharedPreferences prefs = await _prefs;
-
-    setState(() {
-      prefs.remove("savedSentences").then((bool success) {
-        setState(() {
-          keyBoardState = KeyBoardState.Letters;
-        });
-      }).catchError((e) {
-        print("Could not delete: $e");
+      _getSentences().then((result) {
+        if (result == null) {
+          result = List<String>();
+        }
+        result.add(sentence);
+        prefs.setStringList("savedSentences", result).then((bool success) {});
       });
-      _savedSentences = [];
     });
   }
 

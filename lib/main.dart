@@ -9,6 +9,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SpraakBak',
+      showSemanticsDebugger: false,
       theme: ThemeData(primaryColor: Colors.red),
       home: new MyHomePage(title: 'SpraakBak'),
     );

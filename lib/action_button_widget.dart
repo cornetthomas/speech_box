@@ -10,7 +10,7 @@ class ActionButton extends StatelessWidget {
   ActionButton(
       {this.displayValue,
       @required this.action,
-      this.height = 60.0,
+      this.height = 80.0,
       this.width = 200.0,
       this.color = Colors.green});
 

@@ -85,9 +85,6 @@ class IconBoardState extends State<IconBoard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("SpraakBak"),
-      ),
       body: Center(
         child: SafeArea(
           child: Container(

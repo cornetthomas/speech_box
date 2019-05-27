@@ -12,8 +12,8 @@ class ValueButton extends StatelessWidget {
     @required this.value,
     this.displayValue,
     @required this.pressed,
-    this.height = 60.0,
-    this.width = 200.0,
+    this.height = 100.0,
+    this.width = 100.0,
   });
 
   @override
@@ -21,15 +21,17 @@ class ValueButton extends StatelessWidget {
     return Container(
       height: height,
       width: width,
-      margin: EdgeInsets.all(4.0),
+      margin: EdgeInsets.all(6.0),
       child: RaisedButton(
         color: Colors.greenAccent,
-        child: Text(
-          displayValue,
-          style: Theme.of(context)
-              .textTheme
-              .title
-              .copyWith(fontSize: 40.0, fontWeight: FontWeight.bold),
+        child: Center(
+          child: Text(
+            displayValue,
+            style: Theme.of(context)
+                .textTheme
+                .title
+                .copyWith(fontSize: 40.0, fontWeight: FontWeight.bold),
+          ),
         ),
         onPressed: onButtonPressed,
         shape: RoundedRectangleBorder(
