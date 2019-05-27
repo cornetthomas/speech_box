@@ -26,15 +26,14 @@ class _SpeechInputState extends State<SpeechInput> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.red,
+                  color: Colors.white30,
                   shape: BoxShape.rectangle,
                   borderRadius: BorderRadius.all(Radius.circular(16.0)),
                   border: Border.all(
                     width: 2.0,
                   ),
                 ),
-                // height: MediaQuery.of(context).size.height * 0.10,
-
+                height: MediaQuery.of(context).size.height * 0.10,
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Row(
